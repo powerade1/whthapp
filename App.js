@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -28,14 +28,11 @@ export default function App() {
     loadPg();
   }, []);
   useEffect(() => {
-    savePg(newPg);
-  }, {working});
+    savePg();
+  }, [working]);
   const travel = () => setWorking(false);
   const work = () => setWorking(true);
   const onChangeText = (payload) => setText(payload);
-  const newPg = {
-    [Date.now()]: { working }
-  };
   const savePg = async (toSavePg) => {
     try {
       await AsyncStorage.setItem(SSTORAGE_KEY, JSON.stringify(toSavePg));
@@ -47,6 +44,15 @@ export default function App() {
     const p = await AsyncStorage.getItem(SSTORAGE_KEY);
     p !== null ? setWorking(JSON.parse(p)) : null;
   };
+  const addPg = async() => {
+    const newPg = {
+      [Date.now()]: { working },
+    };
+    newPg === setWorking(true) ? setWorking(true): setWorking(false);
+    await savePg(newPg);
+  };
+
+
   const saveToDos = async (toSave) => {
     await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
   };
@@ -66,6 +72,11 @@ export default function App() {
     await saveToDos(newToDos);
     setText('');
   };
+
+
+
+
+
   const deleteToDo = (key) => {
     Alert.alert('Delete To Do', 'Are you sure?', [
       { text: 'Cancel' },
@@ -85,14 +96,14 @@ export default function App() {
     <View style={styles.container}>
       <StatusBar style="light" />
       <View style={styles.header}>
-        <TouchableOpacity onPress={work}>
+        <TouchableOpacity onPress={work} onPressOut={addPg}>
           <Text
             style={{ ...styles.btnText, color: working ? 'white' : theme.grey }}
           >
             Work
           </Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={travel}>
+        <TouchableOpacity onPress={travel} onPressOut={addPg}>
           <Text
             style={{
               ...styles.btnText,
